@@ -46,6 +46,17 @@ public:
   
   ~vector()
   {
+    if (m_uCount > 0)
+    {
+      T* pPtr = m_pVectorBegin;
+      for (unsigned int i = 0; i < m_uCount; i++)
+      {
+        pPtr->~T();
+
+        pPtr++;
+      }
+    }
+    
     if (m_pVectorBegin != nullptr)
     {
       free(m_pVectorBegin);
