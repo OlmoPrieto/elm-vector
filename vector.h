@@ -14,6 +14,24 @@ public:
     a = b = c = 0;
   }
   
+  Foo operator=(const Foo &other)
+  {
+    Foo f;
+    f.a = other.a;
+    f.b = other.b;
+    f.c = other.c;
+    printf("operator=\n");
+    return f;
+  }
+
+  Foo(const Foo &other)
+  {
+    printf("copy\n");
+    a = other.a;
+    b = other.b;
+    c = other.c;
+  }
+
   ~Foo()
   {
     
@@ -91,7 +109,9 @@ public:
     }
 
     m_pIterator = m_pVectorBegin + m_uCount;
-    *m_pIterator = element;
+    //*m_pIterator = T(element);
+    //*m_pIterator = element;
+    memcpy(m_pIterator, &element, m_uClassSize);
     m_pIterator = nullptr;
     
     m_uCount++;
