@@ -5,8 +5,8 @@ Homemade vector similar to the std one, but faster and more memory-friendly
 
 
 
-![promisechains](http://imgur.com/NVdSfEp)
+![chart](http://i.imgur.com/Vof97Hk.png)
 
-![alt tag](http://imgur.com/iBusfcP)
+![chart](https://i.imgur.com/iBusfcP.png)
 
-![alt tag](http://imgur.com/Vof97Hk)
+![chart](https://i.imgur.com/iBusfcP.png)
