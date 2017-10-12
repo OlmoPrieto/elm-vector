@@ -3,76 +3,95 @@
 
 #include "vector.h"
 
-typedef unsigned int uint32;
-typedef unsigned char byte;
+void test_push_back() {
+  printf("\n============\n");
+  printf("Test push back");
+  printf("\n============\n");
+
+  elm::vector<Foo> v;
+  Foo f;
+  f.a = 1; f.b = 2; f.c = 3;
+
+  printf("Elements before push back: %u\n", v.size());
+  v.push_back(f);
+  printf("Elements after push back: %u\n", v.size());
+
+  v.push_back(f);
+  printf("Pushed back same element again\n");
+  printf("Elements after pushing the same element twice: %u\n", v.size());
+}
+
+void test_pop_back() {
+  printf("\n============\n");
+  printf("Test push back");
+  printf("\n============\n");
+
+  elm::vector<Foo> v;
+  Foo f;
+  f.a = 1; f.b = 2; f.c = 3;
+
+  printf("Element to insert: ");
+  f.printValues();
+
+  v.push_back(f);
+  printf("Elements before pop back: %u\n", v.size());
+  printf("Memory used before pop back: %u bytes\n", v.memorySize());
+  Foo f2 = v.pop_back();
+  printf("Elements after pop back: %u\n", v.size());
+  printf("Memory used after pop back: %u bytes\n", v.memorySize());
+  printf("Element retrieved on pop back: ");
+  f2.printValues();
+}
+
+void test_reserve() {
+  printf("\n============\n");
+  printf("Test reserve");
+  printf("\n============\n");
+
+  elm::vector<Foo> v;
+
+  printf("Initial capacity: %u\n", v.capacity());
+  v.reserve(10);
+  printf("Capacity after having reserved 10 elements: %u\n", v.capacity());
+}
+
+void test_memoryUsage() {
+  printf("\n============\n");
+  printf("Memory usage");
+  printf("\n============\n");
+
+  elm::vector<Foo> v;
+  printf("Memory used on construction: %u bytes\n", v.memorySize());
+  v.reserve(10);
+  printf("Memory used after reserving 10 elements: %u bytes\n", v.memorySize());
+
+  printf("Creating another vector...\n");
+  elm::vector<Foo> v2;
+  printf("Capacity: %u\n", v2.capacity());
+
+  Foo f;
+  v2.push_back(f);
+  v2.push_back(f);
+  printf("Memory used after pushing two elements back (same # elements as capacity): %u bytes\n", v2.memorySize());
+  printf("Capacity after inserting two elements: %u\n", v2.capacity());
+  v2.push_back(f);
+  printf("Memory used after inserting another element (forcing reallocation): %u bytes\n", v2.memorySize());
+  printf("Capacity after having inserted three elements: %u\n", v2.capacity());
+}
+
+elm::vector<Foo> s;
+void shit() {
+  Foo f(2, 2, 5);
+  s.push_back(f);
+}
 
 int main() {
+  //test_reserve();
+  //test_memoryUsage();
+  //test_push_back();
+  //test_pop_back();
+  shit();
+  s[0].printValues();
 
-  bool do_log = false;
-
-  uint32 elements = 100;
-
-  vector<Foo> v;
-  printf("Class size: %u\n", v.classSize());
-  uint32 v_cap = v.capacity();
-  uint32 count = 0;
-  //v.reserve(10000);
-
-  for (uint32 i = 0; i < elements; i++)
-  {
-    Foo tmp;
-    tmp.a = i;
-    tmp.b = i + 1;
-    tmp.c = i + 2;
-
-    v.pushBack(tmp);
-    if (v_cap != v.capacity())
-    {
-      count++;
-      v_cap = v.capacity();
-    }
-    //v[i].printValues();
-  }
-
-  std::vector<Foo> vv;
-  uint32 vv_cap = vv.capacity();
-  uint32 count2 = 0;
-  //vv.reserve(10000);
-  
-  for (uint32 i = 0; i < elements; i++)
-  {
-    Foo tmp;
-    tmp.a = i;
-    tmp.b = i + 1;
-    tmp.c = i + 2;
-
-    vv.push_back(tmp);
-    if (vv_cap != vv.capacity())
-    {
-      count2++;
-      vv_cap = vv.capacity();
-    }
-  }
-  
-  printf("Cap changes: v -> %u  vv -> %u\n", count, count2);
-
-  printf("Elements inserted: %u\n", elements);
-
-  Foo ff;
-  ff.a = 1000;
-  ff.b = 1001;
-  ff.c = 1002;
-  
-  v.insert(ff, 50);
-  printf("Size elm::vector: %u\n", v.size());
-  printf("Element 49: "); v[49].printValues();
-  printf("Element 50: "); v[50].printValues();
-  printf("Element 51: "); v[51].printValues();
-
-  //printf("Size std::vector: %u\n", vv.size());
-  printf("MemorySize elm::vector: %u\n", v.memorySize());
-  printf("MemorySize std::vector: %u\n", vv.capacity() * sizeof(Foo));
-
-  getchar();
   return 0;
 }

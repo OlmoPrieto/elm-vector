@@ -13,6 +13,8 @@ public:
   {
     a = b = c = 0;
   }
+
+  Foo(int a, int b, int c) : a(a), b(b), c(c) {}
   
   Foo operator=(const Foo &other)
   {
@@ -20,13 +22,13 @@ public:
     f.a = other.a;
     f.b = other.b;
     f.c = other.c;
-    printf("operator=\n");
+    //printf("operator=\n");
     return f;
   }
 
   Foo(const Foo &other)
   {
-    printf("copy\n");
+    //printf("copy\n");
     a = other.a;
     b = other.b;
     c = other.c;
@@ -37,7 +39,7 @@ public:
     
   }
 
-  void printValues() 
+  void printValues() const
   {
     printf("%d %d %d\n", a, b, c);
   }
@@ -47,10 +49,17 @@ public:
   int c;
 };
 
+namespace elm {
 template <class T>
 class vector
 {
 public:
+  /*
+   *  Allocates size for two elements on creation
+   *
+   *  Maybe not allocating anything before insering
+   *  an element could be an option.
+  */
   vector()
   {
     m_uClassSize = sizeof(T);
@@ -70,7 +79,7 @@ public:
       for (unsigned int i = 0; i < m_uCount; i++)
       {
         pPtr->~T();
-
+        m_uCount = 0;
         pPtr++;
       }
     }
@@ -101,7 +110,7 @@ public:
     return m_uCapacity;
   }
 
-  void pushBack(const T& element)
+  void push_back(const T& element)
   {
     if (m_uCount == m_uCapacity)
     {
@@ -109,9 +118,8 @@ public:
     }
 
     m_pIterator = m_pVectorBegin + m_uCount;
-    //*m_pIterator = T(element);
-    //*m_pIterator = element;
-    memcpy(m_pIterator, &element, m_uClassSize);
+    //memcpy(m_pIterator, &element, m_uClassSize);
+    new(m_pIterator)T(element);
     m_pIterator = nullptr;
     
     m_uCount++;
@@ -140,8 +148,8 @@ public:
       }
 
       m_pIterator = m_pVectorBegin + position;
-      //*m_pIterator = element;
-      memcpy(m_pIterator, &element, m_uClassSize);
+      //memcpy(m_pIterator, &element, m_uClassSize);
+      new(m_pIterator)T(element);
       m_uCount++;
       m_pIterator = nullptr;
 
@@ -149,16 +157,21 @@ public:
       {
         T e = aux[i - position - 1];
         m_pIterator = m_pVectorBegin + i;
-        *m_pIterator = e;
+        //*m_pIterator = e;
+        new(m_pIterator)T(e);
       }
       m_pIterator = nullptr;
+    }
+    else
+    {
+      printf("Index out of range in vector\n");
     }
   }
 
   /*
    *  Returns a copy of the popped element.
   */
-  T popBack()
+  T pop_back()
   {
     if (m_uCount > 0)
     {
@@ -276,3 +289,4 @@ private:
   uint32 m_uCount;
   uint32 m_uCapacity;
 };
+}
