@@ -144,7 +144,7 @@ public:
       for (uint32 i = position; i < m_uCount; i++)
       {
         T e = *(m_pVectorBegin + i);
-        aux.pushBack(e);
+        aux.push_back(e);
       }
 
       m_pIterator = m_pVectorBegin + position;
@@ -157,7 +157,8 @@ public:
       {
         T e = aux[i - position - 1];
         m_pIterator = m_pVectorBegin + i;
-        //*m_pIterator = e;
+        
+        m_pIterator->~T();
         new(m_pIterator)T(e);
       }
       m_pIterator = nullptr;
@@ -165,6 +166,50 @@ public:
     else
     {
       printf("Index out of range in vector\n");
+    }
+  }
+
+  /*
+   *
+  */
+  T erase(uint32 uPosition, bool bKeepOrder = true) {
+    if (uPosition < m_uCount)
+    {
+      vector<T> aux;
+      aux.reserve(m_uCapacity);
+      // for (uint32 i = 0; i < uPosition; ++i)
+      // {
+      //   T e = *(m_pVectorBegin + i);
+      //   aux.push_back(e);
+      // }
+
+      // COPY the element
+      T e = *(m_pVectorBegin + uPosition);
+      
+      for (uint32 i = uPosition + 1; i < m_uCount; ++i)
+      {
+        T e = *(m_pVectorBegin + i);
+        aux.push_back(e);
+      }
+
+      for (uint32 i = uPosition; i < m_uCount; i++)
+      {
+        T e = aux[i - uPosition];
+        m_pIterator = m_pVectorBegin + i;
+        
+        m_pIterator->~T();
+        new(m_pIterator)T(e);
+      }
+      m_pIterator = nullptr;
+
+      e.~T();
+      --m_uCount;
+      return e;
+    }
+    else
+    {
+      printf("Index out of range in vector\n");
+      return T();
     }
   }
 
@@ -177,7 +222,7 @@ public:
     {
       T* e = m_pVectorBegin + (m_uCount - 1);
       e->~T();
-      m_uCount--;
+      --m_uCount;
       return *e;
     }
   }

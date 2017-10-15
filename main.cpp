@@ -23,7 +23,7 @@ void test_push_back() {
 
 void test_pop_back() {
   printf("\n============\n");
-  printf("Test push back");
+  printf("Test pop back");
   printf("\n============\n");
 
   elm::vector<Foo> v;
@@ -57,7 +57,7 @@ void test_reserve() {
 
 void test_memoryUsage() {
   printf("\n============\n");
-  printf("Memory usage");
+  printf("Test memory usage");
   printf("\n============\n");
 
   elm::vector<Foo> v;
@@ -79,10 +79,65 @@ void test_memoryUsage() {
   printf("Capacity after having inserted three elements: %u\n", v2.capacity());
 }
 
-elm::vector<Foo> s;
-void shit() {
-  Foo f(2, 2, 5);
-  s.push_back(f);
+void test_insert() {
+  printf("\n============\n");
+  printf("Test insert");
+  printf("\n============\n");
+
+  elm::vector<Foo> v;
+  Foo f;
+  f.a=1;f.b=2;f.c=3;
+
+  printf("Pushing two elements back...\n");
+  v.push_back(f);
+  v.push_back(f);
+
+  printf("Elements:\n");
+  v[0].printValues();
+  v[1].printValues();
+
+  Foo f2;
+  f2.a=10;f2.b=11;f2.c=12;
+
+  printf("Inserting an element in position 1...\n");
+  v.insert(f2, 1);
+
+  printf("Elements after insert:\n");
+  v[0].printValues();
+  v[1].printValues();
+  v[2].printValues();
+}
+
+void test_erase() {
+  printf("\n============\n");
+  printf("Test erase");
+  printf("\n============\n");
+
+  elm::vector<Foo> v;
+  Foo f;
+  f.a=1;f.b=2;f.c=3;
+  Foo f2;
+  f2.a=10;f2.b=11;f2.c=12;
+
+  printf("Pushing three elements back...\n");
+  v.push_back(f);
+  v.push_back(f2);
+  v.push_back(f);
+
+  printf("Elements:\n");
+  v[0].printValues();
+  v[1].printValues();
+  v[2].printValues();
+
+  printf("Erasing element at position 1...\n");
+  Foo f3 = v.erase(1);
+
+  printf("Elements in vector:\n");
+  v[0].printValues();
+  v[1].printValues();
+
+  printf("Erased element: ");
+  f3.printValues();
 }
 
 int main() {
@@ -90,8 +145,8 @@ int main() {
   //test_memoryUsage();
   //test_push_back();
   //test_pop_back();
-  shit();
-  s[0].printValues();
-
+  //test_insert();
+  test_erase();
+  
   return 0;
 }
