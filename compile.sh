@@ -1,2 +1,3 @@
+rm test
 clear
 make

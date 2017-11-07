@@ -73,8 +73,9 @@ void test_memoryUsage() {
   v2.push_back(f);
   v2.push_back(f);
   printf("Memory used after pushing two elements back (same # elements as capacity): %u bytes\n", v2.memorySize());
-  printf("Capacity after inserting two elements: %u\n", v2.capacity());
+  printf("Capacity after pushing two elements: %u\n", v2.capacity());
   v2.push_back(f);
+  printf("Pushing another element back...\n");
   printf("Memory used after inserting another element (forcing reallocation): %u bytes\n", v2.memorySize());
   printf("Capacity after having inserted three elements: %u\n", v2.capacity());
 }
@@ -86,7 +87,7 @@ void test_insert() {
 
   elm::vector<Foo> v;
   Foo f;
-  f.a=1;f.b=2;f.c=3;
+  f.a=1;f.b=2;f.c=3;f.s="F";
 
   printf("Pushing two elements back...\n");
   v.push_back(f);
@@ -97,7 +98,7 @@ void test_insert() {
   v[1].printValues();
 
   Foo f2;
-  f2.a=10;f2.b=11;f2.c=12;
+  f2.a=10;f2.b=11;f2.c=12;f2.s="F2";
 
   printf("Inserting an element in position 1...\n");
   v.insert(f2, 1);
@@ -138,6 +139,62 @@ void test_erase() {
 
   printf("Erased element: ");
   f3.printValues();
+
+  printf("Testing erase without keeping order...\n");
+  printf("Creating new vector and pushing three elements back...\n");
+  elm::vector<Foo> v2;
+  f.a=1;f.b=2;f.c=3;
+  f2.a=10;f2.b=11;f2.c=12;
+
+  v2.push_back(f);
+  v2.push_back(f2);
+  v2.push_back(f);
+
+  printf("Elements:\n");
+  v2[0].printValues();
+  v2[1].printValues();
+  v2[2].printValues();
+
+  printf("Erasing element at position 1...\n");
+  f3 = v2.erase(1, false);
+
+  printf("Elements in vector 2:\n");
+  v2[0].printValues();
+  v2[1].printValues();
+
+  printf("Erased element: ");
+  f3.printValues();
+}
+
+void test_swap() {
+  printf("\n============\n");
+  printf("Test swap");
+  printf("\n============\n");
+
+  elm::vector<Foo> v;
+  Foo f;
+  f.a=1;f.b=2;f.c=3;
+  Foo f2;
+  f2.a=10;f2.b=11;f2.c=12;
+  Foo f3;
+  f3.a=20;f3.b=31;f3.c=13;
+
+  v.push_back(f);
+  v.push_back(f2);
+  v.push_back(f3);
+
+  printf("Elements before swapping:\n");
+  v[0].printValues();
+  v[1].printValues();
+  v[2].printValues();
+
+  printf("Swapping values...\n");
+
+  v.swapElements(0, 1);
+  printf("Elements after swapping:\n");
+  v[0].printValues();
+  v[1].printValues();
+  v[2].printValues();
 }
 
 int main() {
@@ -146,7 +203,8 @@ int main() {
   //test_push_back();
   //test_pop_back();
   //test_insert();
-  test_erase();
+  //test_erase();
+  test_swap();
   
   return 0;
 }

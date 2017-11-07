@@ -1,10 +1,13 @@
+#ifndef __VECTOR_H__
+#define __VECTOR_H__
+
 #include <iostream>
 #include <memory>
 #include <cmath>
 #include <cstring>
+#include <cassert>
 
 typedef unsigned int uint32;
-typedef unsigned char byte;
 
 class Foo 
 {
@@ -22,6 +25,7 @@ public:
     f.a = other.a;
     f.b = other.b;
     f.c = other.c;
+    f.s = other.s;
     //printf("operator=\n");
     return f;
   }
@@ -32,6 +36,7 @@ public:
     a = other.a;
     b = other.b;
     c = other.c;
+    s = other.s;
   }
 
   ~Foo()
@@ -41,12 +46,13 @@ public:
 
   void printValues() const
   {
-    printf("%d %d %d\n", a, b, c);
+    printf("%d %d %d\n%s\n", a, b, c, s.c_str());
   }
 
   int a;
   int b;
   int c;
+  std::string s;
 };
 
 namespace elm {
@@ -63,11 +69,14 @@ public:
   vector()
   {
     m_uClassSize = sizeof(T);
-    
+    printf("Class size: %u bytes\n", m_uClassSize);
+
     m_uCount = 0;
     m_uCapacity = 2;
+    m_uRealCapacity = m_uCapacity + 1;
 
-    m_pVectorBegin = (T*)malloc(m_uCapacity * m_uClassSize);
+    m_pVectorBegin = (T*)malloc(m_uRealCapacity * m_uClassSize);
+    assert(m_pVectorBegin != nullptr && "couldn't allocate memory. vector()");
     m_pIterator = nullptr;
   }
   
@@ -79,9 +88,10 @@ public:
       for (unsigned int i = 0; i < m_uCount; i++)
       {
         pPtr->~T();
-        m_uCount = 0;
+        //m_uCount = 0;
         pPtr++;
       }
+      m_uCount = 0;
     }
     
     if (m_pVectorBegin != nullptr)
@@ -175,32 +185,34 @@ public:
   T erase(uint32 uPosition, bool bKeepOrder = true) {
     if (uPosition < m_uCount)
     {
-      vector<T> aux;
-      aux.reserve(m_uCapacity);
-      // for (uint32 i = 0; i < uPosition; ++i)
-      // {
-      //   T e = *(m_pVectorBegin + i);
-      //   aux.push_back(e);
-      // }
-
       // COPY the element
-      T e = *(m_pVectorBegin + uPosition);
-      
-      for (uint32 i = uPosition + 1; i < m_uCount; ++i)
-      {
-        T e = *(m_pVectorBegin + i);
-        aux.push_back(e);
-      }
+      //T e = *(m_pVectorBegin + uPosition);
+      T e((*(m_pVectorBegin + uPosition)));
 
-      for (uint32 i = uPosition; i < m_uCount; i++)
-      {
-        T e = aux[i - uPosition];
-        m_pIterator = m_pVectorBegin + i;
+      if (bKeepOrder == true) {
+
+        vector<T> aux;
+        aux.reserve(m_uCapacity);
         
-        m_pIterator->~T();
-        new(m_pIterator)T(e);
+        for (uint32 i = uPosition + 1; i < m_uCount; ++i)
+        {
+          T e = *(m_pVectorBegin + i);
+          aux.push_back(e);
+        }
+
+        for (uint32 i = uPosition; i < m_uCount; i++)
+        {
+          T e = aux[i - uPosition];
+          m_pIterator = m_pVectorBegin + i;
+          
+          m_pIterator->~T();
+          new(m_pIterator)T(e);
+        }
+        m_pIterator = nullptr;
       }
-      m_pIterator = nullptr;
+      else {
+        swapElements(uPosition, m_uCount - 1);
+      }
 
       e.~T();
       --m_uCount;
@@ -225,12 +237,13 @@ public:
       --m_uCount;
       return *e;
     }
+
+    return T();
   }
 
   /*
    *  If amount is lesser than the actual capacity of the vector,
-   *  no reallocation will happen and the elements in the difference 
-   *  will be lost.
+   *  no reallocation will happen.
   */
   void reserve(uint32 amount)
   {
@@ -239,13 +252,18 @@ public:
       vector::allocate(amount);
     } else
     {
-      m_uCapacity = amount;
+      printf("Requested lesser capacity than the current one\n");
+      
+      // TODO: implement shrink_to_fit()
+
+      // m_uCapacity = amount;
+      // m_uRealCapacity = m_uCapacity + 1;
     }
   }
 
   /*  
-   *  Note: Because it return an object, it has to be destroyed
-   *  locally when exiting the function
+   *  Note: Because it returns an object, it has to be destroyed
+   *  locally when exiting the function -> CHECK if currently this happens
   */
   T& operator[](uint32 index) const
   {
@@ -269,7 +287,14 @@ public:
 
   uint32 memorySize()
   {
-    return (m_uCapacity * m_uClassSize);
+    return (m_uRealCapacity * m_uClassSize);
+  }
+
+  void swapElements(uint32 uFirst, uint32 uSecond)
+  {
+    new(m_pVectorBegin + m_uRealCapacity - 1)T((*(m_pVectorBegin + uFirst)));
+    new(m_pVectorBegin + uFirst)T((*(m_pVectorBegin + uSecond)));
+    new(m_pVectorBegin + uSecond)T((*(m_pVectorBegin + m_uRealCapacity - 1)));
   }
 
 private:
@@ -288,18 +313,21 @@ private:
       //uint32 converted_cap = m_uCapacity + m_uCapacity * 2;
 
       /* round(cap + (cap / 2) + log(cap + 1)) */
-      double new_cap = (double)m_uCapacity + ((double)m_uCapacity / 4.0) + log(m_uCapacity + 1);
+      double new_cap = (double)m_uRealCapacity + ((double)m_uRealCapacity / 4.0) + log(m_uRealCapacity + 1);
       uint32 converted_cap = (uint32)round(new_cap);
 
-      amount = converted_cap;
+      amount = converted_cap - 1; // -1 is a hack to avoid an if() below
     }
+
+    m_uRealCapacity = amount + 1;
+    m_uCapacity = m_uRealCapacity - 1;
 
     T* tmp = m_pVectorBegin;
     m_pVectorBegin = nullptr;
-    m_pVectorBegin = (T*)malloc(amount * m_uClassSize);
+    m_pVectorBegin = (T*)malloc(m_uRealCapacity * m_uClassSize);
     if (m_pVectorBegin != nullptr)  // assert(m_pVectorBegin == nullptr && "Failed to allocate new memory");
     {
-      memset(m_pVectorBegin, 0, amount * m_uClassSize);
+      memset(m_pVectorBegin, 0, m_uRealCapacity * m_uClassSize);
 
       memcpy(m_pVectorBegin, tmp, m_uClassSize * m_uCount);
       /*for (uint32 i = 0; i < m_uCount; i++)
@@ -316,8 +344,6 @@ private:
       free(tmp);
       tmp = nullptr;
 
-      m_uCapacity = amount;
-
       return true;
     } else
     {
@@ -333,5 +359,8 @@ private:
   uint32 m_uClassSize;
   uint32 m_uCount;
   uint32 m_uCapacity;
+  uint32 m_uRealCapacity;
 };
 }
+
+#endif // __VECTOR_H__
