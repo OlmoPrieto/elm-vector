@@ -2,6 +2,8 @@
 #include <memory>
 #include <cmath>
 #include <cstring>
+#include <cassert>
+#include <cstdarg>
 
 typedef unsigned int uint32;
 typedef unsigned char byte;
@@ -22,6 +24,7 @@ public:
     f.a = other.a;
     f.b = other.b;
     f.c = other.c;
+    f.s = other.s;
     //printf("operator=\n");
     return f;
   }
@@ -32,6 +35,7 @@ public:
     a = other.a;
     b = other.b;
     c = other.c;
+    s = other.s;
   }
 
   ~Foo()
@@ -41,12 +45,13 @@ public:
 
   void printValues() const
   {
-    printf("%d %d %d\n", a, b, c);
+    printf("%d %d %d\n%s", a, b, c, s.c_str());
   }
 
   int a;
   int b;
   int c;
+  std::string s;
 };
 
 namespace elm {
@@ -68,6 +73,7 @@ public:
     m_uCapacity = 2;
 
     m_pVectorBegin = (T*)malloc(m_uCapacity * m_uClassSize);
+    assert(m_pVectorBegin != nullptr && "couldn't allocate memory. vector()");
     m_pIterator = nullptr;
   }
   
@@ -79,9 +85,10 @@ public:
       for (unsigned int i = 0; i < m_uCount; i++)
       {
         pPtr->~T();
-        m_uCount = 0;
+        //m_uCount = 0;
         pPtr++;
       }
+      m_uCount = 0;
     }
     
     if (m_pVectorBegin != nullptr)
@@ -143,8 +150,9 @@ public:
       aux.reserve(m_uCapacity);
       for (uint32 i = position; i < m_uCount; i++)
       {
-        T e = *(m_pVectorBegin + i);
-        aux.push_back(e);
+        //T e((*(m_pVectorBegin + i)));
+        //aux.push_back(e);
+        aux.emplace_back((*(m_pVectorBegin + i)));
       }
 
       m_pIterator = m_pVectorBegin + position;
@@ -155,7 +163,7 @@ public:
 
       for (uint32 i = position + 1; i < m_uCount; i++)
       {
-        T e = aux[i - position - 1];
+        T e(aux[i - position - 1]);
         m_pIterator = m_pVectorBegin + i;
         
         m_pIterator->~T();
@@ -172,29 +180,25 @@ public:
   /*
    *
   */
-  T erase(uint32 uPosition, bool bKeepOrder = true) {
+  T erase(uint32 uPosition) {
     if (uPosition < m_uCount)
     {
-      vector<T> aux;
-      aux.reserve(m_uCapacity);
-      // for (uint32 i = 0; i < uPosition; ++i)
-      // {
-      //   T e = *(m_pVectorBegin + i);
-      //   aux.push_back(e);
-      // }
-
       // COPY the element
-      T e = *(m_pVectorBegin + uPosition);
+      T e((*(m_pVectorBegin + uPosition)));
+
+      vector<T> aux;
+      aux.reserve(uPosition + 1); // (m_uCapacity);
       
       for (uint32 i = uPosition + 1; i < m_uCount; ++i)
       {
-        T e = *(m_pVectorBegin + i);
-        aux.push_back(e);
+        // T e = *(m_pVectorBegin + i);
+        // aux.push_back(e);
+        aux.emplace_back((*(m_pVectorBegin + i)));
       }
 
       for (uint32 i = uPosition; i < m_uCount; i++)
       {
-        T e = aux[i - uPosition];
+        T e(aux[i - uPosition]);
         m_pIterator = m_pVectorBegin + i;
         
         m_pIterator->~T();
@@ -220,11 +224,13 @@ public:
   {
     if (m_uCount > 0)
     {
-      T* e = m_pVectorBegin + (m_uCount - 1);
-      e->~T();
+      T e((*(m_pVectorBegin + (m_uCount - 1))));
+      e.~T();
       --m_uCount;
-      return *e;
+      return e;
     }
+
+    return T();
   }
 
   /*
@@ -232,14 +238,18 @@ public:
    *  no reallocation will happen and the elements in the difference 
    *  will be lost.
   */
-  void reserve(uint32 amount)
+  void reserve(uint32 uAmount)
   {
-    if (amount > m_uCapacity)
+    if (uAmount > m_uCapacity)
     {
-      vector::allocate(amount);
+      vector::allocate(uAmount);
     } else
     {
-      m_uCapacity = amount;
+      printf("Requested lesser capacity than the current one\n");
+
+      // TODO: implement shrink_to_fit()
+
+      //m_uCapacity = uAmount;
     }
   }
 
@@ -270,6 +280,21 @@ public:
   uint32 memorySize()
   {
     return (m_uCapacity * m_uClassSize);
+  }
+
+  template <typename... Args> 
+  void emplace_back(Args&&... args) {
+
+    if (m_uCount == m_uCapacity)
+    {
+      vector::allocate();
+    }
+
+    m_pIterator = m_pVectorBegin + m_uCount;
+    new(m_pIterator)T(std::forward<Args>(args)...);
+    m_pIterator = nullptr;
+    
+    m_uCount++;
   }
 
 private:
