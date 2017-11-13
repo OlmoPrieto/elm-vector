@@ -30,7 +30,7 @@ void test_pop_back() {
   Foo f;
   f.a = 1; f.b = 2; f.c = 3;
 
-  printf("Element to insert: ");
+  printf("Element to push back: ");
   f.printValues();
 
   v.push_back(f);
@@ -56,18 +56,23 @@ void test_reserve() {
 }
 
 void test_memoryUsage() {
-  printf("\n============\n");
+  printf("\n==================\n");
   printf("Test memory usage");
-  printf("\n============\n");
+  printf("\n==================\n");
 
   elm::vector<Foo> v;
+  printf("Foo class size: %u bytes\n", v.classSize());
+
   printf("Memory used on construction: %u bytes\n", v.memorySize());
   v.reserve(10);
+  printf("Capacity: %u elements\n", v.capacity());
   printf("Memory used after reserving 10 elements: %u bytes\n", v.memorySize());
+
+  printf("\n");
 
   printf("Creating another vector...\n");
   elm::vector<Foo> v2;
-  printf("Capacity: %u\n", v2.capacity());
+  printf("Capacity: %u elements\n", v2.capacity());
 
   Foo f;
   v2.push_back(f);
@@ -126,85 +131,28 @@ void test_erase() {
   v.push_back(f);
 
   printf("Elements:\n");
-  v[0].printValues();
-  v[1].printValues();
-  v[2].printValues();
+  printf("[0]: ");  v[0].printValues();
+  printf("[1]: ");  v[1].printValues();
+  printf("[2]: ");  v[2].printValues();
 
   printf("Erasing element at position 1...\n");
   Foo f3 = v.erase(1);
 
   printf("Elements in vector:\n");
-  v[0].printValues();
-  v[1].printValues();
+  printf("[0]: ");  v[0].printValues();
+  printf("[1]: ");  v[1].printValues();
 
   printf("Erased element: ");
   f3.printValues();
-
-  printf("Testing erase without keeping order...\n");
-  printf("Creating new vector and pushing three elements back...\n");
-  elm::vector<Foo> v2;
-  f.a=1;f.b=2;f.c=3;
-  f2.a=10;f2.b=11;f2.c=12;
-
-  v2.push_back(f);
-  v2.push_back(f2);
-  v2.push_back(f);
-
-  printf("Elements:\n");
-  v2[0].printValues();
-  v2[1].printValues();
-  v2[2].printValues();
-
-  printf("Erasing element at position 1...\n");
-  f3 = v2.erase(1, false);
-
-  printf("Elements in vector 2:\n");
-  v2[0].printValues();
-  v2[1].printValues();
-
-  printf("Erased element: ");
-  f3.printValues();
-}
-
-void test_swap() {
-  printf("\n============\n");
-  printf("Test swap");
-  printf("\n============\n");
-
-  elm::vector<Foo> v;
-  Foo f;
-  f.a=1;f.b=2;f.c=3;
-  Foo f2;
-  f2.a=10;f2.b=11;f2.c=12;
-  Foo f3;
-  f3.a=20;f3.b=31;f3.c=13;
-
-  v.push_back(f);
-  v.push_back(f2);
-  v.push_back(f3);
-
-  printf("Elements before swapping:\n");
-  v[0].printValues();
-  v[1].printValues();
-  v[2].printValues();
-
-  printf("Swapping values...\n");
-
-  v.swapElements(0, 1);
-  printf("Elements after swapping:\n");
-  v[0].printValues();
-  v[1].printValues();
-  v[2].printValues();
 }
 
 int main() {
-  //test_reserve();
-  //test_memoryUsage();
   //test_push_back();
   //test_pop_back();
+  //test_reserve();
+  //test_memoryUsage();
   //test_insert();
-  //test_erase();
-  test_swap();
+  test_erase();
   
   return 0;
 }

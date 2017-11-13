@@ -45,7 +45,7 @@ public:
 
   void printValues() const
   {
-    printf("%d %d %d\n%s", a, b, c, s.c_str());
+    printf("%d %d %d\n%s\n", a, b, c, s.c_str());
   }
 
   int a;
